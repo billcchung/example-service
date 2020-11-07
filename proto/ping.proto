@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+package ping;
+option go_package = ".;ping";
+
+service Ping {
+  // Get returns an response with same message id and body, and with timestamp.
+  rpc Get (PingRequest) returns (PingResponse);
+  // GetAfter is same as Ping but return the response after certain time
+  rpc GetAfter (PingRequestWithSleep) returns (PingResponse);
+  // GetRandom generates random strings and return, also produce lots of useless stuff to show the effects of heap
+  rpc GetRandom (PingRequest) returns (PingResponse);
+}
+
+
+message PingRequest {
+  string message_ID = 1;
+  string message_body = 2;
+}
+
+message PingRequestWithSleep {
+  string message_ID = 1;
+  string message_body = 2;
+  int32 sleep = 3;
+}
+
+message PingResponse {
+  string message_ID = 1;
+  string message_body = 2;
+  uint64 timestamp = 3;
+}
