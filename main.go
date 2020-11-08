@@ -13,15 +13,18 @@ import (
 func main() {
 	var projectID string
 	var service string
+	var serviceVersion string
 	var address string
 	flag.StringVar(&projectID, "p", "", "The GCP Project ID")
 	flag.StringVar(&service, "s", "example-service", "The service name")
+	flag.StringVar(&address, "v", "1", "The service version")
 	flag.StringVar(&address, "a", ":8080", "The address to listen for connections")
 	flag.Parse()
 
 	err := profiler.Start(profiler.Config{
-		Service:   service,
-		ProjectID: projectID,
+		Service:        service,
+		ServiceVersion: serviceVersion,
+		ProjectID:      projectID,
 	})
 	if err != nil {
 		log.Fatalf("Unable to start GCP profiler, err: %s", err)
