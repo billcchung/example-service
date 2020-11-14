@@ -2,9 +2,11 @@ package main
 
 import (
 	"cloud.google.com/go/profiler"
+	"contrib.go.opencensus.io/exporter/stackdriver"
 	"flag"
 	"github.com/billcchung/example-service/ping"
 	pb "github.com/billcchung/example-service/proto"
+	"go.opencensus.io/trace"
 	"google.golang.org/grpc"
 	"log"
 	"net"
@@ -21,6 +23,7 @@ func main() {
 	flag.StringVar(&address, "a", ":8080", "The address to listen for connections")
 	flag.Parse()
 
+	// Setup Cloud Profiler
 	err := profiler.Start(profiler.Config{
 		Service:        service,
 		ServiceVersion: serviceVersion,
@@ -30,6 +33,19 @@ func main() {
 		log.Fatalf("Unable to start GCP profiler, err: %s", err)
 	}
 	log.Println("configured cloud profiler")
+
+	// Setup Cloud Trace
+	exporter, err := stackdriver.NewExporter(stackdriver.Options{
+		ProjectID: projectID,
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+	trace.RegisterExporter(exporter)
+	// use ProbabilitySampler for production
+	trace.ApplyConfig(trace.Config{DefaultSampler: trace.AlwaysSample()})
+
+	log.Println("configured cloud trace")
 
 	s := grpc.NewServer()
 	pb.RegisterPingServer(s, Ping.Server{})
